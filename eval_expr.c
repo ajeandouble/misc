@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-
 unsigned int l_ostack = 0;
 unsigned int l_output = 0;
 
@@ -36,6 +35,7 @@ token output_pop() {
 	}
 	return output[l_output--];
 }
+
 int ostack_pop() {
 	printf("ostack_pop");
 	if (!l_ostack)
@@ -118,6 +118,7 @@ int eval(char *str) {
 	int result = 0;
 
 	while (*str) {
+		// Numbers
 		if ((*str >= '0' && *str <= '9') || (*str == '-')) {
 
 			printf("atoi");
@@ -135,23 +136,26 @@ int eval(char *str) {
 
 			str += len_number;
 		}
+		// Brackets
+		else if (*str == '(' || * str == ')') {
+			token br;
+			br.type = 'b'; // bracket
+			br.op = *str;
+			if (*str == '(')
+				ostack_push(br);
+			else if (*str == ')') {
+				while (ostack[l_ostack - 1].type != 'b' && ostack[l_ostack - 1].op != '(') {
+					ostack_pop();
+				}
+				ostack_pop();
+			}
+			++str;
+		}
+		// Operators
 		else {
 			token op;
 			op.type = 'o';
-			switch (*str) {
-				case '+':
-					op.op = '+';
-					break;
-				case '-':
-					op.op = '-';
-					break;
-				case '*':
-					op.op = '*';
-					break;
-				case '/':
-					op.op = '/';
-					break;
-			}
+			op.op = *str;
 			while (gt_precedence(op.op)) {
 				printf("ostackpop\n");
 				ostack_pop();	
